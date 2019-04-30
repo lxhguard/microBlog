@@ -1,0 +1,272 @@
+1. iview中的cell用on-click添加事件，并不能触发。
+2. vue main.js  post 发送 data数据会有错误：
+            Error: Network Error
+    也根本进入不了后台的服务。
+    所有的发送数据都是get
+3.(已解决) /*没有弄明白怎么在headers中设置token
+          let token = req.headers.token;
+          */
+     修改方案:let token = req.query.token;   使用get params
+4.(已解决) 用post params 发送请求，结果却在路由路径中却有了参数
+     例如：/users/me/medal?name=%E5%8A%&token=bQ-dy5LmTLjjrwsGVrfHnh
+     解决方案: // 正则表达式匹配  匹配api '?' 前的路径，去除query参数
+               url = url.match(/(\S*)\?/)[1];
+5.(已解决)node 接受图片上传：（搞定图片上传，常用的开源组件有multer、formidable）
+安装：cnpm install multer --save
+     cnpm install ali-oss
+
+参考网络 vue简单上传，node简单接受
+
+6.(已解决)图片上传完成后打开报错，如下：
+     Error: ENOENT:  no such file or directory, open 
+     '/public/images/uploads/1553704557135_992458.png'
+解决方案:index.js中let filePath = `/public/images/uploads/${item.filename}`;
+     改为 let filePath = `./public/images/uploads/${item.filename}`;
+7.(已解决) 在login单击"跳过"，再进入me.vue 点击 "登录|注册",会进入login.vue，
+          但是加载圈一直不消失，会一直显示。
+解决方案：在login.vue生命周期添加一个初始化，默认加载圈在一开始的状态就是不显示,即false
+          beforeCreate:function(){
+               store.state.isShow = false;
+          }
+8.(已解决):在main.js中配置子路由children时候，path加上了“/”,
+          导致<router-link />会跳转到空白页面。
+解决方案:以“/”开头的嵌套路径会被当作根路径，所以子路由上不用加“/”;
+     在生成路由时，主路由上的path会被自动添加到子路由之前，
+     所以子路由上的path不用在重新声明主路由上的path了。
+升级main.js:    //定义一个页面找不到的组件
+               {
+                    path: "*",
+                    component: notFound
+               }
+9.在discuss.vue（历史长河）中点击“民俗文化”页面，路由跳转，但是你刷新一下，
+他的默认选框会跳到“历史沧桑”，内容却还留在“民俗文化”。
+10.(已解决)无法访问node项目下到图片:
+在app.js中将初始化的静态屏蔽掉，改成下面这个
+app.use('/public', express.static('public'));//将文件设置成静态
+// app.use(express.static(path.join(__dirname, 'public')));
+通过 Express 内置的 express.static 可以方便地托管静态文件，例如图片、CSS文件等。 
+将静态资源文件所在的目录作为参数传递给 express.static 中间件就可以提供静态资源文件的访问了。
+*注意点：你提供给 express.static 函数的路径是一个相对node进程启动位置的相对路径。
+如果你在其他的文件夹中启动express app，更稳妥的方式是使用静态资源文件夹的绝对路径：
+app.use('/static', express.static(__dirname + '/public'));
+11.(知识点)突然在img中引用data中的数据不会了:
+解决方案:<img :src="this.person.avatarurl" width="60" height="60"/>
+     或者<img :src="person.avatarurl" width="60" height="60"/>
+12.(知识点)router-link中传值的三种方式：
+index.js
+{    
+     path: ‘/exhibition’,     
+     name: ‘Exhibition’, 
+     component: Exhibition 
+}
+(1).传值:  <router-link tag="a" :to="{name: 'Exhibition', params: {img:item}}">
+               <img class="xk" :src="item">
+          </router-link>
+    使用: <img :src="this.$route.params.img"/>
+(2).传值: <router-link tag="a" :to="{path: '/exhibition', query: {img:item}}">
+               <img class="xk" :src="item">
+          </router-link>
+    使用:<img :src="this.$route.query.img"/>
+(3).index.js
+     { 
+          path: ‘/beautyChart/:type’, 
+          name: ‘BeautyChart’, 
+          component: BeautyChart 
+     }
+     传值: <router-link to="/beautyChart/mz" tag="li"><a href="#">美图</a></router-link>
+     使用: this.$route.params.type
+13(知识点).vue中的$route和$router的区别:
+$route为当前router跳转对象里面可以获取name、path、query、params等
+$router为VueRouter实例，想要导航到不同URL，则使用$router.push方法
+14.(已解决)想要将路由中的数据传递到data(){}中：
+解决方案： created(){
+               this.info = this.$route.query.person;
+          }
+注意点：只能用$route,但是$router不可以。
+15.(已解决 踩坑):个人中心修改信息的时候，发现“取消”之后，用户信息依然被篡改。
+原因是：对象赋值，赋的是引用，两个对象操作同一个内存空间。
+解决办法：Object.assign
+     例var b = Object.assign({}, a); 将a赋值给b,b分配一个新的内存空间。
+(知识点):数组赋值，分配一个新的空间使用concat()
+     例: var arr2 = [].concat(arr1); 将arr1赋值给arr2,arr2分配一个新内存空间。
+16.(知识点).stop修饰符是用来阻止冒泡事件的发生的
+17.(知识点)vue点击头像更换头像:
+[思路]:(1).将input默认样式设置display:none;，即设为不可见 
+      (2).在js里调用：当点击新样式的时候，调用这个input的点击事件
+18(知识点):this.$el是在mounted中才会出现的，在created的时候是没有的,是指当前组件的的元素
+FileReader主要用于将文件内容读入内存，通过一系列异步接口，可以在主线程中访问本地文件。
+onload:当读取操作成功完成时调用
+e.target 和IE下的event.srcElement:当前事件的源,可以捕获当前事件作用的对象。
+FileReader对象的readAsDataURL方法可以将读取到的文件编码成Data URL。Data URL是一项特殊的技术，可以将资料(例如图片)内嵌在网页之中，不用放到外部文件。使用Data URL的好处是，您不需要额外再发出一个HTTP 请求到服务器端取得额外的资料；而缺点便是，网页的大小可能会变大。它适合应用在内嵌小图片，不建议将大图像文件编码成Data URL来使用。您的图像文件不能够超过浏览器限定的大小，否则无法读取图像文件。
+在选好图片后，点击提交按钮，直接将this.formData发送给接口，接口传回是否已经上传成功的提示
+19.(知识点):form的enctype属性为编码方式，常用有两种：application/x-www-form-urlencoded和multipart/form-data，
+默认为application/x-www-form-urlencoded。
+     1.x-www-form-urlencoded
+     当action为get时候，浏览器用x-www-form-urlencoded的编码方式把form数据
+     转换成一个字串（name1=value1&name2=value2…），
+     然后把这个字串append到url后面，用?分割，加载这个新的url。
+     2.multipart/form-data
+     当action为post时候，浏览器把form数据封装到http body中，然后发送到server。 
+     如果没有type=file的控件，用默认的application/x-www-form-urlencoded就可以了。 
+     但是如果有type=file的话，就要用到multipart/form-data了。
+     浏览器会把整个表单以控件为单位分割，并为每个部分加上Content-Disposition(form-data或者file),
+     Content-Type(默认为text/plain),name(控件name)等信息，并加上分割符(boundary)。
+     enctype="multipart/form-data"是上传二进制数据;它告诉我们传输的数据要用到多媒体传输协议，
+     由于多媒体传输的都是大量的数据，所以规定上传文件必须是post方法，
+     <input>的type属性必须是file。form里面的input的值以2进制的方式传过去，
+     所以request就得不到值了
+20.(未解决):在node中访问图片，除了设置的默认图片,别的图片都会乱码。
+          但是在vue中访问却是好好的。虽然不影响交互，但是还是存在疑问,为什么会这样。
+21.(*未解决):在infocenter.vue中发送修改的用户信息，在得到res后，向data中赋值改变，
+会报错说data中的东西未定义！第一次碰到这种情况，也不知道怎么解决。
+源代码： .then(function (res) {
+            alert('修改个人信息成功！！！');
+            this.$router.push({path: '/infocenter'});
+          })
+原因： 在请求执行成功后执行回调函数中的内容，
+      回调函数处于其它函数的内部this不会与任何对象绑定，为undefined
+解决方案：一）将指向vue对象的this赋值给外部方法定义的属性，然后在内部方法中使用该属性
+     二）使用箭头函数
+22.(知识点 尚未运用):平常在使用阿里云 oss 客户端时，阿里云会给你一个key 和 secret，
+登录后就可以直接上传了。但是如果用户在网页端，想上传文件到阿里云 oss 上，
+是不能直接放 key 和 secret 在网页上的，因为一旦别人拿了你的用户名和密码，就可以为所欲为了
+但是可以在后端给前端生成一个 token，这样可以让用户在不使用 key 和 secret 的情况下，
+也可以上传数据到你的服务器上
+23.(token总结):之前用了两天研究了代码和思路，今天又用一天研究了一下，明白了七八成。
+原来的方法：只能用axios.get发送params数据,在main.js中设置axios拦截器，在拦截请求时,
+          如果有params，就将token加在get请求数据中发送给后台
+          var localtoken = localStorage.getItem("token");
+          if (config.params){
+            config.params.token = localtoken;
+          }
+因为把token加到了路径参数里面，后端app.js请求拦截器中需要从req.query获取token。
+并且还需要正则表达式把登录和注册路径后面的参数都删除，进行API路径判断。
+因为登录和注册不需要判断token。登录会得到token,注册不包含任何关于token的操作。
+这个方法的缺点是不支持post，设置了跨域，发送的内容主体的格式等等也不好用，没找到原因。
+现在的方法:把token加到请求头中，在main.js中的axios请求拦截器中设置每个请求头中的
+Authorization字段添加token
+     var localtoken = localStorage.getItem("token");
+     if(localtoken){
+          //配置请求头中  Authorization 字段的值为拿到的token
+          config.headers['Authorization'] = localtoken;
+     }
+     在后台首先在跨域请求中允许Authorization，然后获取请求头中的token
+     res.header("Access-Control-Allow-Headers", "Authorization");
+     var token = req.headers["authorization"];
+24(未解决).select不能初始化，加上created都不行。
+created(){
+　　　　　//如果没有这句代码，select中初始化会是空白的，默认选中就无法实现
+        this.info.sex = this.sexList[0].value;
+    },//可是这个起作用
+25.(已解决).后台得到的formData一直为空，后来发现需要嵌套一个upload函数，我已经定义了，
+用在router的第一层就好.
+26.(知识点)//canvas.toDataURL(type, encoderOptions);
+//图片格式，默认为image/png。图片质量，取值范围为0到1。返回值：包含dataURI的DOMString。
+//在转换成dataURI前必须先确保图片成功加载到，于是.toDataURL()方法应该写在<img>的onload异步事件中。
+27(知识点).脑子一下空白了，忘记怎么绑定key
+v-for="(posting,index) in postings" :key="index"
+28(知识点).content 属性与 :before 及 :after 伪元素配合使用，来插入生成内容。
+该属性用于定义元素之前或之后放置的生成内容。默认地，这往往是行内内容，
+不过该内容创建的框类型可以用属性 display 控制。
+29(经验借鉴).在postings.vue中借鉴了QQ空间说说的样式.
+30(疑问 已解决).模拟hover,怎么在在组件中用set，
+@mouseout="$set(showMenu,false)" 会报错
+模拟下拉菜单：思路：加一个定时器。菜单盒子：onmouseleave 时 启动定时器来关闭菜单
+               菜单列表：onmouseon 时 clearSetTimeout
+代码实现:WillShowMenu(){//更多操作 显示
+            this.showMenu = true;
+            clearInterval(this.timer)
+        },
+        NotShowMenu(){//更多操作 关闭
+            this.timer = setInterval( () => {　
+                this.showMenu = false;
+    　　　　　　}, 100);
+            
+        },
+31(项目点).node做一个简单的邮件反馈，依赖第三方模块：npm install nodemailer
+(已解决).之前测试好好的，改了一下前端，突然发送邮件就报错了。完全没找到思路解决.
+{ TypeError [ERR_INVALID_ARG_TYPE]: The "chunk" argument must be one of type string or Buffer. Received type number
+解决方案：html: randomFns.toString()
+邮件信息必须是字符串。
+
+32(踩坑点).post发送应该发送对象，发送字符串,
+后台会接收{ dddd: '' }，dddd其实是前端发送的字符串的数值
+33.(踩坑点)vue 更改数组里的数据的坑
+vue定义data中的数组里，如果不使用数组的方法来替换的话，数据是不会被重新渲染的！
+解决办法：在vue脚手架中，this.$set(this.showMenu,index,true);
+34.(vue-router)路由的两种传参方式：
+<!-- 命名的路由 -->
+<router-link :to="{ name: 'user', params: { userId: 123 }}">User</router-link>
+<!-- 带查询参数，下面的结果为 /register?plan=private -->
+<router-link :to="{ path: 'register', query: { plan: 'private' }}">Register</router-link>
+35.聊天室：
+socket.on()用于接受消息。socket.emit() 用于发送消息
+
+
+
+33.聊天室
+前端：安装sudo cnpm install --save socket.io-client
+
+
+--------------------------------------------------------
+34(打包到线上).
+前端vue打包：
+1、把绝对路径改为相对路径
+我们打开config/index.js 会看到一个build属性，这里就我们打包的基本配置了。
+你在这里可以修改打包的目录，打包的文件名。最重要的是一定要把绝对目录改为相对目录。
+assetsPublicPath:'./'
+这样才能保证我们打包出去的项目可以正常预览。
+2.把所有.vue文件中的接口全部改成后台接口，在这里是http://193.112.48.157:3333
+（我尝试不改，就修改项目配，但是尝试了许久，发现不会。）
+3、在命令行中用npm run build 进行打包:npm run build
+
+
+后台上线启动：
+进入根目录： cd /
+进入express后台文件夹: cd data
+              cd www
+              cd express
+              cd myserver  此时已经进入项目文件夹，可以看到bin,public等文件夹
+     启动后台:  npm start
+
+
+云服务端环境配置：
+1、在服务器上安装node.js
+curl --silent --location https://rpm.nodesource.com/setup_8.x | sudo bash -
+sudo yum -y install nodejs
+sudo yum install gcc-c++ make
+2、安装mongodb
+vim  /etc/yum.repos.d/mongodb-org-4.0.repo
+然后将下面这段代码添加到新建的文件中(i进行编辑。esc, :wq 回车，保存成功)
+[mongodb-org-4.0]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.0/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-4.0.asc
+开始安装:sudo yum install -y mongodb-org
+您可以指定任何可用的MongoDB版本。但是yum ，当有更新的版本可用时，请升级软件包。为防止意外升级，
+请将包装固定。要固定包，请将以下exclude指令添加到您的/etc/yum.conf文件中：
+exclude = mongodb-org，mongodb-org-server，mongodb-org-shell，mongodb-org-mongos，mongodb-org-tools
+启动mongodb：mongo --host 127.0.0.1:27222
+**PS**:安装好node和mongodb之后就可以将server文件夹导入到腾讯云服务器上了，放到哪个文件夹看个人喜欢。
+这里建议导入的时候先删除项目中的依赖文件夹node_modules。
+因为这个文件夹还是比较大的，导入会花大量时间。
+如果这里删除了依赖文件夹，导入之后别忘了在服务器的server文件夹中安装依赖，否则程序无法运行.
+安装依赖:npm install
+然后进入server文件夹启动js文件就行了:node index.js
+3.安装淘宝镜像（npm 太慢了!）：
+npm install -g cnpm --registry=https://registry.npm.taobao.org
+
+
+
+
+
+
+
+
+
+
+
+
+

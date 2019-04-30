@@ -1,0 +1,15 @@
+进入图片解析--------req.body
+{ username: 'haige',
+  disc: '此人很懒，还没写个人简介',
+  _id: '5ca23150779339e39adfcdfc' }
+  打印 req.files------
+[ { fieldname: 'file',
+    originalname: 'history_beizhou.jpeg',
+    encoding: '7bit',
+    mimetype: 'image/jpeg',
+    destination: './public/images/uploads',
+    filename: '1554133790130_471259.png',
+    path: 'public/images/uploads/1554133790130_471259.png',
+    size: 14665 } ]
+数据库中的路径filePath------------
+http://localhost:4444/public/images/uploads/1554133790130_471259.png

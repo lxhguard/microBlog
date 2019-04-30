@@ -1,0 +1,93 @@
+一.client:
+1.vue init webpack client
+2.npm install --save axios
+进入main.js:
+    //引入axios
+    import Axios from 'axios'
+    //修改原型链，全局使用axios,这样之后可在每个组件的methods中调用$axios命令完成数据请求
+    Vue.prototype.$axios = Axios
+    //可选 Axios拦截器配置
+    //定义一个请求拦截器
+    Axios.interceptors.request.use(function (config) {
+    store.state.isShow = true; //在请求发出之前进行一些操作
+    return config
+    })
+    //定义一个响应拦截器
+    Axios.interceptors.response.use(function (config) {
+    store.state.isShow = false;//在这里对返回的数据进行处理
+    return config
+    })
+3.安装UI
+(1).element-UI
+npm i element-ui -S
+进入main.js:
+    import ElementUI from 'element-ui';
+    import 'element-ui/lib/theme-chalk/index.css';
+    Vue.use(ElementUI);
+(2).安装iview
+进入main.js:
+//引入iview
+import iView from "iview";
+import "iview/dist/styles/iview.css";
+//使用iview
+Vue.use(iView);
+4.安装vuex
+npm n install vuex --save
+
+
+
+
+
+
+
+
+
+
+
+二.server:
+1.解决跨域问题:
+//解决跨域
+app.all('*', function (req, res, next) {
+  //将外源设为指定的域，比如：http://localhost:8080
+  res.header("Access-Control-Allow-Origin", "*");
+  //将Access-Control-Allow-Credentials设为true  允许携带cookie
+  res.header('Access-Control-Allow-Credentials', true); 
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
+  res.header("X-Powered-By", ' 3.2.1');
+  //返回数据格式为json字符串
+  res.header("Content-Type", "application/json;charset=utf-8");
+  next();
+});
+2.cnpm install mysql --save-dev
+进入app.js:
+    //加载数据库模块mysql
+    var mysql = require('mysql');
+    //连接数据库
+    var connection = mysql.createConnection({
+        host: 'localhost',
+        user: 'root',//用户名
+        password: '1314',//密码
+        database: 'microblog'//要连接的数据库名称
+    });
+    //执行创建连接 
+    connection.connect(function (err) {
+    if (err) {
+        console.log("连接失败");
+    } else {
+        console.log("连接成功");
+    }
+    });
+缺点：在开发web应用程序时，连接池是一个很重要的概念。建立一个数据库连接所消耗的性能成本是很高的。在服务器应用程序中，如果为每一个接收到的客户端请求都建立一个或多个数据库连接，将严重降低应用程序性能。
+改进:使用连接池
+    略
+3.node + jwt(jsonwebtoken) 搭建token身份验证
+npm i jsonwebtoken // 安装jsonwebtoken模块
+
+
+
+
+三.数据库：
+在mac下启动mongodb,安装数据库到相应服务端目录下:
+mongod --dbpath=/Users/wanggonggege/Desktop/xuptWebNet/server/db --port=27222
+
